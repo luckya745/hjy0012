@@ -1,0 +1,182 @@
+[
+  {
+    "room": "01 · 베르사유의 문",
+    "title": "왕의 소집장",
+    "clue": "1789년, 재정과 정치의 위기 속에서 세 신분의 대표들이 모인다.",
+    "q": "1789년 5월 루이 16세가 소집한 신분별 대표 회의는?",
+    "options": [
+      "국민공회",
+      "삼부회",
+      "총재정부",
+      "공안위원회"
+    ],
+    "answer": 1,
+    "hint": "성직자·귀족·평민, 세 신분이 참여했습니다.",
+    "explain": "삼부회는 1789년 5월 5일 베르사유에서 개회했습니다.",
+    "source": "https://en.chateauversailles.fr/discover/history/key-dates/summoning-estates-general-1789",
+    "id": "seed-1",
+    "active": true
+  },
+  {
+    "room": "02 · 신분의 문",
+    "title": "세 번째 신분의 목소리",
+    "clue": "특권 신분 밖의 사람들도 나라의 주인이다.",
+    "q": "혁명 전 프랑스에서 제3신분에 속했던 집단은?",
+    "options": [
+      "성직자",
+      "귀족",
+      "왕족",
+      "평민"
+    ],
+    "answer": 3,
+    "hint": "농민뿐 아니라 도시 시민과 부르주아도 포함됩니다.",
+    "explain": "성직자는 제1신분, 귀족은 제2신분이었고, 평민은 제3신분이었습니다.",
+    "source": "https://en.chateauversailles.fr/sites/default/files/presse/documents/cp_restauration_jeu_de_paume_en.pdf",
+    "id": "seed-2",
+    "active": true
+  },
+  {
+    "room": "03 · 의회의 문",
+    "title": "국민을 대표한다는 선언",
+    "clue": "신분별 회의를 넘어 국민 전체를 대표하는 의회를 만들자.",
+    "q": "1789년 6월 제3신분 대표들이 중심이 되어 선언한 의회는?",
+    "options": [
+      "국민의회",
+      "총재정부",
+      "제국의회",
+      "빈 회의"
+    ],
+    "answer": 0,
+    "hint": "이름에 국가의 주권자인 국민이 들어갑니다.",
+    "explain": "1789년 6월 17일 제3신분 대표들은 국민의회를 선언했습니다.",
+    "source": "https://www.loc.gov/resource/gdcwdl.wdl_14430/",
+    "id": "seed-3",
+    "active": true
+  },
+  {
+    "room": "04 · 맹세의 문",
+    "title": "테니스 코트의 약속",
+    "clue": "1789년 6월 20일, 대표들은 실내 구기장에 모여 맹세했다.",
+    "q": "테니스 코트의 서약에서 대표들이 약속한 것은?",
+    "options": [
+      "왕의 권한을 무제한으로 늘린다",
+      "귀족만 세금을 면제한다",
+      "헌법을 제정할 때까지 해산하지 않는다",
+      "삼부회를 영구 폐지하고 돌아간다"
+    ],
+    "answer": 2,
+    "hint": "새로운 정치 질서를 정할 가장 기본적인 법을 생각해 보세요.",
+    "explain": "대표들은 프랑스에 헌법을 마련할 때까지 흩어지지 않겠다고 서약했습니다.",
+    "source": "https://en.chateauversailles.fr/discover/history/key-dates/jeu-paume-oath-1789",
+    "id": "seed-4",
+    "active": true
+  },
+  {
+    "room": "05 · 요새의 문",
+    "title": "1789년 7월 14일",
+    "clue": "파리 시민들이 왕권의 상징으로 여겨진 요새 감옥을 습격했다.",
+    "q": "시민들이 습격한 감옥의 이름은?",
+    "options": [
+      "베르사유",
+      "바스티유",
+      "루브르",
+      "튈르리"
+    ],
+    "answer": 1,
+    "hint": "프랑스의 7월 14일 기념일과 연결되는 이름입니다.",
+    "explain": "1789년 7월 14일 바스티유 습격은 혁명을 상징하는 사건이 되었습니다.",
+    "source": "https://gallica.bnf.fr/essentiels/repere/prise-bastille-1789",
+    "id": "seed-5",
+    "active": true
+  },
+  {
+    "room": "06 · 특권의 문",
+    "title": "오래된 질서를 풀다",
+    "clue": "1789년 8월, 특권과 봉건적 권리를 없애려는 결정이 내려진다.",
+    "q": "1789년 8월 4일의 결정이 겨냥한 것은?",
+    "options": [
+      "봉건적 특권",
+      "모든 국민의 투표권",
+      "신문 발행 자체",
+      "국민의회 설립"
+    ],
+    "answer": 0,
+    "hint": "태어난 신분에 따른 불평등과 관련됩니다.",
+    "explain": "8월 4일과 11일의 법령은 봉건적 권리를 폐지하는 방향을 제시했습니다. 실제 이행에는 후속 조치가 필요했습니다.",
+    "source": "https://www.presidence-de-la-republique.fr/hist/10/ang/instit/text1.html",
+    "id": "seed-6",
+    "active": true
+  },
+  {
+    "room": "07 · 권리의 문",
+    "title": "새 시대의 문서",
+    "clue": "1789년 8월, 자유와 권리의 평등을 선언하는 문서가 채택된다.",
+    "q": "이 문서의 이름은?",
+    "options": [
+      "마그나 카르타",
+      "나폴레옹 법전",
+      "인간과 시민의 권리 선언",
+      "베르사유 조약"
+    ],
+    "answer": 2,
+    "hint": "보통 프랑스 인권선언이라고 부릅니다.",
+    "explain": "1789년 8월 26일 인권선언은 자유와 권리의 평등 등 혁명의 기본 원리를 담았습니다.",
+    "source": "https://www.elysee.fr/en/french-presidency/the-declaration-of-the-rights-of-man-and-of-the-citizen",
+    "id": "seed-7",
+    "active": true
+  },
+  {
+    "room": "08 · 주권의 문",
+    "title": "권력은 어디에서 오는가",
+    "clue": "인권선언 제3조에서 주권의 근원을 찾아라.",
+    "q": "인권선언은 주권의 근원이 어디에 있다고 선언했을까?",
+    "options": [
+      "국왕 개인",
+      "국민 전체",
+      "귀족 가문",
+      "외국 군주"
+    ],
+    "answer": 1,
+    "hint": "왕의 신분 대신 나라를 구성하는 사람들을 떠올려 보세요.",
+    "explain": "제3조는 주권의 근원이 국민에 있다고 선언합니다. 선언된 원리와 당시 실제 참정권의 범위는 같지 않았습니다.",
+    "source": "https://www.elysee.fr/en/french-presidency/the-declaration-of-the-rights-of-man-and-of-the-citizen",
+    "id": "seed-8",
+    "active": true
+  },
+  {
+    "room": "09 · 헌법의 문",
+    "title": "왕권에도 규칙을",
+    "clue": "1791년, 첫 혁명 헌법이 마련된다.",
+    "q": "1791년 헌법 아래 프랑스의 정치 체제는?",
+    "options": [
+      "절대왕정",
+      "입헌군주제",
+      "나폴레옹 제정",
+      "총재정부"
+    ],
+    "answer": 1,
+    "hint": "왕이 존재하지만 헌법이 권력을 제한합니다.",
+    "explain": "1791년 헌법은 왕권을 헌법으로 제한하는 입헌군주제를 마련했습니다.",
+    "source": "https://en.wikipedia.org/wiki/French_Revolution",
+    "id": "seed-9",
+    "active": true
+  },
+  {
+    "room": "10 · 자유의 마지막 문",
+    "title": "왕정 이후의 프랑스",
+    "clue": "1792년 9월, 혁명은 새로운 정치 단계로 나아간다.",
+    "q": "왕정 폐지 후 프랑스에 수립된 체제는?",
+    "options": [
+      "봉건제",
+      "절대왕정",
+      "제1제정",
+      "제1공화정"
+    ],
+    "answer": 3,
+    "hint": "왕이 없는 정치 체제입니다.",
+    "explain": "1792년 9월 왕정이 폐지되고 프랑스 제1공화정이 시작되었습니다. 혁명은 이후에도 갈등과 변화를 겪었습니다.",
+    "source": "https://en.wikipedia.org/wiki/French_Revolution",
+    "id": "seed-10",
+    "active": true
+  }
+]
