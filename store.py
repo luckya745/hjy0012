@@ -66,6 +66,10 @@ class Store:
                             Column('run_id', String(36), nullable=False), Column('question_id', String(36)),
                             Column('question', Text), Column('choice', Integer), Column('correct', Boolean),
                             Column('hint', Boolean), Column('seconds', Float), Column('created', String(40)))
+        self.hall = Table('hall_of_fame', md, Column('game_id', String(36), primary_key=True),
+                          Column('name', String(40), nullable=False), Column('score', Integer, nullable=False),
+                          Column('total', Integer, nullable=False), Column('seconds', Float, nullable=False),
+                          Column('registered', String(40), nullable=False))
         md.create_all(self.engine)
         from sqlalchemy.dialects.sqlite import insert as sqlite_insert
         from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -141,6 +145,18 @@ class Store:
         with self.engine.connect() as c:
             target = getattr(self, table)
             return [dict(r) for r in c.execute(select(target)).mappings()]
+
+    def add_hall(self, game_id, name, total, seconds):
+        from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+        from sqlalchemy.dialects.postgresql import insert as pg_insert
+        dialect_insert = pg_insert if self.persistent_cloud else sqlite_insert
+        with self.engine.begin() as c:
+            c.execute(dialect_insert(self.hall).values(game_id=game_id, name=name, score=100,
+                      total=total, seconds=max(0, seconds), registered=now()).on_conflict_do_nothing())
+
+    def hall_rows(self):
+        with self.engine.connect() as c:
+            return [dict(r) for r in c.execute(select(self.hall).order_by(self.hall.c.registered.desc())).mappings()]
 
     def backup(self):
         return json.dumps({'version': 1, 'questions': self.list_questions(), 'recording': self.recording()},

@@ -6,7 +6,7 @@ from pathlib import Path
 import streamlit as st
 from store import Store, csv_bytes
 from security import verify_password
-from game import new_game, submit, advance
+from game import new_game, submit, advance, score, hall_eligible, register_hall
 from sqlalchemy.engine import URL
 
 st.set_page_config(page_title='프랑스혁명 · 자유의 열쇠', page_icon='🗝️', layout='wide')
@@ -98,7 +98,7 @@ div.stButton>button{border-radius:10px;min-height:46px}
 with st.sidebar:
     st.caption('PARIS, 1789 · ESCAPE ARCHIVE')
     st.title('자유의 열쇠')
-    page = st.radio('페이지', ['방탈출 게임', '관리자 페이지', '사용 안내'])
+    page = st.radio('페이지', ['방탈출 게임', '명예의 전당', '관리자 페이지', '사용 안내'])
     st.divider()
     st.caption('질문·힌트·해설은 한국어로 제공됩니다.')
     if os.environ.get('ESCAPE_LOCAL') == '1':
@@ -110,6 +110,13 @@ with st.sidebar:
 def play():
     st.title('프랑스혁명 · 자유의 열쇠')
     st.write('잠긴 파리의 기록실에서 혁명의 흔적을 찾으세요. 모든 봉인을 풀면 자유의 문이 열립니다.')
+    st.caption('첫 시도에 정답을 맞힌 문제의 비율로 점수를 계산합니다. 기본 10문제는 문제당 10점이며 힌트는 감점하지 않습니다. 모든 문제를 첫 시도에 맞히면 100점입니다.')
+    if 'game' in st.session_state and 'first_correct' not in st.session_state.game:
+        del st.session_state['game']
+        for key in list(st.session_state):
+            if key.startswith('choice_'):
+                del st.session_state[key]
+        st.info('점수 기능이 추가되었습니다. 새 게임을 시작해 주세요.')
     if 'game' not in st.session_state:
         questions = store.list_questions(active_only=True)
         st.info(f'현재 활성 문제 {len(questions)}개 · 힌트와 재도전을 사용할 수 있습니다.')
@@ -139,6 +146,27 @@ def play():
     if g['complete']:
         st.success('자유의 문이 열렸습니다!')
         st.write(f"{count}개의 기록을 되찾았습니다. 총 {g['attempts']}번 도전했습니다.")
+        st.metric('최종 점수', f'{score(g):g}점 / 100점')
+        if hall_eligible(g):
+            if g['hall_registered']:
+                st.success('명예의 전당에 등록했습니다!')
+            else:
+                st.subheader('100점 달성! 명예의 전당에 이름을 남기세요')
+                with st.form('register_hall'):
+                    name = st.text_input('명예의 전당 이름 또는 별명', max_chars=40)
+                    consent = st.checkbox('이름 또는 별명이 명예의 전당에 공개되고 저장되는 것에 동의합니다.')
+                    st.caption('이 등록은 학습 기록 저장 설정과 별개입니다. 실명 대신 별명을 사용할 수 있습니다.')
+                    register = st.form_submit_button('명예의 전당 등록', type='primary')
+                if register:
+                    try:
+                        register_hall(g, store, name, consent)
+                        st.rerun()
+                    except ValueError as exc:
+                        st.error(str(exc))
+                    except Exception:
+                        st.error('등록을 저장하지 못했습니다. 잠시 후 다시 시도하세요.')
+        else:
+            st.info('모든 문제를 첫 시도에 맞혀 100점을 받으면 명예의 전당에 등록할 수 있습니다.')
         st.caption('진행 중이던 게임에는 시작 시점의 문제를 사용합니다. 새 게임에는 관리자 수정 내용이 반영됩니다.')
     else:
         q = qs[g['index']]
@@ -210,7 +238,7 @@ def admin():
         return
     if not store.persistent_cloud and os.environ.get('ESCAPE_LOCAL') != '1':
         st.warning('현재 SQLite 저장입니다. Streamlit Cloud에서는 재시작·재배포 후 데이터가 사라질 수 있습니다. 운영 배포 전에 DATABASE_URL을 설정하세요.')
-    tabs = st.tabs(['문제 관리', '기록 설정·조회', '백업·복원'])
+    tabs = st.tabs(['문제 관리', '기록 설정·조회', '백업·복원', '명예의 전당'])
     with tabs[0]:
         qs = store.list_questions()
         st.caption('문제 변경은 새로 시작하는 게임에 반영됩니다. 활성 표시를 끄면 해당 문제가 게임에서 제외됩니다.')
@@ -278,17 +306,41 @@ def admin():
                     st.success('복원했습니다. 기록 설정과 기존 학습 기록은 유지됩니다.')
                 except (ValueError, KeyError, TypeError) as exc:
                     st.error(f'백업을 확인해 주세요: {exc}')
+    with tabs[3]:
+        rows = store.hall_rows()
+        st.subheader('명예의 전당 등록 현황')
+        st.metric('등록된 100점 플레이', len(rows))
+        st.caption('한 번의 플레이는 한 번만 등록됩니다. 새 플레이로 다시 100점을 받으면 별도로 등록할 수 있습니다. 등록 시각은 UTC입니다.')
+        if rows:
+            st.dataframe(rows, use_container_width=True)
+            st.download_button('명예의 전당 CSV', csv_bytes(rows), 'hall-of-fame.csv', 'text/csv')
+        else:
+            st.info('아직 등록된 학습자가 없습니다.')
+
+
+def hall_page():
+    st.title('명예의 전당')
+    st.write('모든 문제를 첫 시도에 맞힌 100점 학습자들의 기록입니다.')
+    rows = store.hall_rows()
+    if not rows:
+        st.info('첫 번째 주인공을 기다리고 있습니다!')
+    else:
+        st.dataframe([{'이름 또는 별명':r['name'], '점수':r['score'], '문제 수':r['total'],
+                       '등록 시각 (UTC)':r['registered']} for r in rows], use_container_width=True)
 
 
 if page == '방탈출 게임':
     play()
 elif page == '관리자 페이지':
     admin()
+elif page == '명예의 전당':
+    hall_page()
 else:
     st.title('사용 안내')
     st.write('프랑스혁명 기본 문제 10개로 시작합니다. 관리자 페이지에서 수정·추가·삭제 및 출제 여부를 변경할 수 있습니다.')
     st.write('게임 도중 관리자 수정은 현재 게임에 영향을 주지 않습니다. 새 게임을 시작하면 최신 문제를 사용합니다.')
     st.write('학습 기록은 관리자의 저장 허용과 플레이어의 저장 동의가 모두 있을 때만 저장합니다. 실명 대신 모둠명이나 별명을 사용하세요.')
+    st.write('점수는 첫 시도 정답 수 ÷ 전체 문제 수 × 100으로 계산합니다. 재도전으로 탈출은 가능하며 힌트는 감점하지 않습니다. 모든 문제를 첫 시도에 맞히고 탈출하면 이름 공개·저장 동의 후 명예의 전당에 등록할 수 있습니다. 명예의 전당은 일반 학습 기록 저장 설정과 별개입니다.')
     st.write('웹 배포에서는 퀴즈·관리자·기록 기능을 제공합니다. USB 햄스터 제어는 동글이 연결된 PC에서 게임실행.cmd로 실행합니다.')
     st.write('로컬 관리자: 관리자실행.cmd → 최초 비밀번호 설정 → 관리자 페이지. 로봇 게임은 별도로 게임실행.cmd를 실행합니다.')
     st.caption('햄스터를 평평하고 넓은 바닥에 놓으세요. 정답은 앞뒤 왕복, 오답은 제자리 좌우 회전이며 긴급 정지 버튼을 제공합니다.')
