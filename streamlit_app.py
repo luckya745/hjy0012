@@ -7,6 +7,7 @@ import streamlit as st
 from store import Store, csv_bytes
 from security import verify_password
 from game import new_game, submit, advance
+from sqlalchemy.engine import URL
 
 st.set_page_config(page_title='프랑스혁명 · 자유의 열쇠', page_icon='🗝️', layout='wide')
 
@@ -19,6 +20,23 @@ def config(key):
         return st.secrets.get(key, '')
     except (FileNotFoundError, st.errors.StreamlitSecretNotFoundError):
         return ''
+
+
+def database_url():
+    # Structured secrets avoid manual URL-encoding and accidental double encoding.
+    raw_password = config('DB_PASSWORD')
+    if raw_password:
+        host = str(config('DB_HOST')).strip()
+        user = str(config('DB_USER')).strip()
+        if not host or not user:
+            raise ValueError('DB_HOST and DB_USER are required with DB_PASSWORD')
+        return URL.create('postgresql+psycopg', username=user,
+                          password=str(raw_password), host=host,
+                          port=int(config('DB_PORT') or 5432),
+                          database=str(config('DB_NAME') or 'postgres'),
+                          query={'sslmode': 'require', 'connect_timeout': '15'}
+                          ).render_as_string(hide_password=False)
+    return config('DATABASE_URL')
 
 
 @st.cache_resource
@@ -62,7 +80,7 @@ def connection_diagnosis(exc):
 
 
 try:
-    store = repository(config('DATABASE_URL'))
+    store = repository(database_url())
 except Exception as exc:
     st.error('데이터 저장소에 연결할 수 없습니다. 관리자가 DATABASE_URL과 데이터베이스 연결 상태를 확인해 주세요.')
     diagnosis, guidance = connection_diagnosis(exc)
