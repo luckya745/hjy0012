@@ -31,10 +31,44 @@ def login_guard():
     return {'lock': threading.Lock(), 'failures': [], 'until': 0}
 
 
+def connection_diagnosis(exc):
+    """Return fixed guidance only; exception text can contain credentials."""
+    original = getattr(exc, 'orig', exc)
+    code = getattr(original, 'sqlstate', None)
+    message = str(original).lower()
+    if code == '28P01' or 'password authentication failed' in message:
+        return 'DB_AUTH', 'DB 서버가 비밀번호를 거부했습니다. 프로젝트의 DB 비밀번호와 한 번만 적용한 URL 인코딩을 확인하세요.'
+    if 'tenant or user not found' in message:
+        return 'DB_USER', 'Pooler 사용자명 또는 호스트가 프로젝트와 일치하지 않습니다. Connect의 Session pooler 주소를 다시 확인하세요.'
+    if code == '42501' or 'permission denied' in message:
+        return 'DB_PERMISSION', '연결은 되었지만 테이블 생성 또는 데이터 접근 권한이 없습니다. DB 사용자 권한을 확인하세요.'
+    if 'could not translate host' in message or 'name or service not known' in message or 'getaddrinfo' in message:
+        return 'DB_HOST', 'DB 호스트 이름을 찾을 수 없습니다. 복사한 호스트와 비밀번호의 URL 인코딩을 확인하세요.'
+    if 'timeout' in message or 'timed out' in message or 'network is unreachable' in message or 'connection refused' in message:
+        return 'DB_NETWORK', 'DB 서버에 도달하지 못했습니다. Supabase 프로젝트가 실행 중인지와 Session pooler 연결 정보를 확인하세요.'
+    if 'ssl' in message or 'certificate' in message:
+        return 'DB_TLS', '암호화 연결 설정을 확인하세요. 연결 주소의 sslmode=require 옵션을 확인하세요.'
+    if isinstance(exc, (ImportError, ModuleNotFoundError)):
+        return 'DB_PACKAGE', 'DB 드라이버 또는 필수 라이브러리를 불러오지 못했습니다. requirements.txt 설치 로그를 확인하세요.'
+    if 'could not parse' in message or 'invalid dsn' in message or 'invalid integer' in message or 'invalid connection option' in message:
+        return 'DB_URL', '연결 주소 형식이 잘못되었습니다. DATABASE_URL에는 설명 문구 없이 실제 URI만 입력하세요.'
+    if isinstance(exc, FileNotFoundError):
+        return 'DB_SEED', '초기 문제 파일 questions.json이 배포 저장소에 있는지 확인하세요.'
+    if code == '42P01' or code == '42703':
+        return 'DB_SCHEMA', '기존 데이터베이스의 테이블 구조가 앱과 다릅니다. 앱 전용 데이터베이스인지 확인하세요.'
+    if isinstance(exc, ValueError):
+        return 'DB_VALUE', '연결 주소 또는 초기 문제 데이터의 형식을 확인하세요.'
+    return 'DB_UNKNOWN', '추가 진단이 필요합니다. 아래 오류 종류와 진단 코드만 알려주세요.'
+
+
 try:
     store = repository(config('DATABASE_URL'))
-except Exception:
+except Exception as exc:
     st.error('데이터 저장소에 연결할 수 없습니다. 관리자가 DATABASE_URL과 데이터베이스 연결 상태를 확인해 주세요.')
+    diagnosis, guidance = connection_diagnosis(exc)
+    st.info(guidance)
+    # Class names and a fixed code are safe to share; never show the raw error/URI.
+    st.code(f'진단 코드: {diagnosis}\n오류 종류: {type(exc).__name__}', language=None)
     st.stop()
 
 st.markdown('''<style>
